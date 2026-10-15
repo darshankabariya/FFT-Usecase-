@@ -17,6 +17,15 @@ python image_to_gcode.py logo.png -o logo.nc --smooth 50 --depth 1.5 --stepdown 
 python image_to_gcode.py portrait.jpg -o portrait.nc --mode singleline --points 8000
 ```
 
+## No Python? Use the web page
+
+`image_to_cnc.html` is the same converter as a single web page: open it in
+any browser, drop a PNG or JPG on it, set the size and the cutter, and
+download the G-code. Nothing is uploaded anywhere; the tracing runs in
+the browser. It has both modes, the Fourier smoothing, the preview and
+the SVG export. The Python script remains the better choice for batch
+work and for very large or very detailed pictures.
+
 ## Two modes
 
 | mode | what it does | use it for |

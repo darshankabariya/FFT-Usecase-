@@ -58,3 +58,21 @@ The training loop does the following:
 I wanted to apply the neural network model to the MNIST dataset, and perhaps I'll do that in the next iteration, but at the moment the model can only do binary classification, not multi-class classification. So, I decided to try and train the model on only the hand-written 0s and 1s from the MNIST dataset.
 
 The model architecture was `[784, 64, 64, 1]` and was trained for 60 iterations (batch gradient descent) with learning rate set to 0.003 and regularization parameter set to 4. The resulting accuracy on a test set was ~97%.
+
+## Bonus - Tracing India's border with Fourier epicycles
+
+The [`fourier-india/`](fourier-india/) folder contains a small, self-contained
+animation that has nothing to do with neural networks but a lot to do with
+seeing maths move: the border of India is turned into a sum of rotating
+circles with the discrete Fourier transform, and the animation shows how the
+drawing sharpens as 5, 10, 15, 100 and 200 circles are kept.
+
+![Fourier epicycles tracing India's border](fourier-india/preview.gif)
+
+```bash
+cd fourier-india
+python fourier_india.py                        # 5/10/15/100/200 side by side -> fourier_india.gif
+python fourier_india.py --circles 100 -o india_100.mp4
+```
+
+See [`fourier-india/README.md`](fourier-india/README.md) for the maths, the options and where the border data comes from.

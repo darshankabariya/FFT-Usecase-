@@ -1,60 +1,68 @@
-# Create and Train a Neural Network in Python
+# Fourier Transform use cases
 
-A simple implementation to create and train a neural network in python. At the moment, this is a fairly simple and straight-forward implementation which is meant to be used for learning about neural networks and deep learning.
+Two small, self-contained projects that put the discrete Fourier
+transform to work on real shapes: one to watch it, one to cut wood with it.
 
-Use the class `Model` to instantiate a neural network. This instance can be trained using the `train` method. Currently, this model can be applied only on binary classification problems. 
+| folder | what it is |
+| --- | --- |
+| [`fourier-india/`](fourier-india/) | India's border redrawn by a chain of rotating circles (Fourier epicycles). Python script that renders GIF/MP4, plus a browser page where you pick 5, 10, 15, 100, 200 or any number of circles. |
+| [`image-to-cnc/`](image-to-cnc/) | A picture in, G-code for a wood CNC router out. Python script and a browser app. Uses the Fourier low-pass to smooth traced outlines, and explains where the transform helps a CNC pipeline and where it does not. |
 
-## Using the Model
+## 1. Tracing India's border with epicycles
 
-Use the model as following:
+![Fourier epicycles tracing India's border with 5, 10, 15, 100 and 200 circles](fourier-india/preview.gif)
+
+The border is read as a closed curve of complex numbers and transformed.
+Every coefficient is a circle: radius `|c[k]|`, start angle `arg(c[k])`,
+turning `k` times per lap. Chained largest first, the tip of the last arm
+redraws the border, and the number of circles you keep is the level of
+detail: 5 give a blob, 15 give the peninsula, 100 follow the coast, 200
+pick up the Rann of Kutch and the Sundarbans.
+
+```bash
+cd fourier-india
+pip install numpy matplotlib
+python fourier_india.py                               # 5/10/15/100/200 side by side -> fourier_india.gif
+python fourier_india.py --circles 100 -o india_100.mp4
 ```
-m = Model()
-m.add_layers([2, 5, 3, 1])
-X = # TRAINING EXAMPLES
-Y = # TRAINING LABELS
 
-m.train(X, Y, iterations = 50, alpha = 0.1, verbose = False)
+Open `fourier-india/india_epicycles.html` in a browser for the
+interactive version. The border comes from Natural Earth (public domain),
+India point-of-view edition, mainland only.
+
+## 2. Image to CNC toolpath
+
+![lettering sample converted to a toolpath](image-to-cnc/samples/logo_toolpath.png)
+
+`image_to_gcode.py` turns a black-on-white picture into closed cutting
+loops ordered for short tool travel, or a photo into one continuous line
+that never lifts the tool. Output is plain GRBL G-code with a preview
+drawn from the file itself.
+
+```bash
+cd image-to-cnc
+pip install numpy opencv-python-headless matplotlib
+python image_to_gcode.py samples/logo.png -o logo.nc --width-mm 200 --depth 1.5 --stepdown 0.8
+python image_to_gcode.py samples/logo.png -o logo.nc --smooth 50        # Fourier-smoothed outlines
+python image_to_gcode.py photo.jpg -o photo.nc --mode singleline --points 8000
 ```
-Keep the following points in mind:
 
-* In the `add_layers()` method, pass on a list of nodes you want for each layer, starting with the number of features as the first value. Each layer is a densely connected layer. The output node must be set to 1 currently (since only binary classification is implemented at the moment)
-* You can add as many hidden layers as you want. The list of layers should look something like this: `[NUMBER OF FEATURES, NODES OF LAYER 2, NODES OF LAYER 3...., NODES OF LAYER K, 1]`
-* The shape of examples must be (NUMBER OF FEATURES, NUMBER OF EXAMPLES)
-* The shape of labels must be (1, NUMBER OF EXAMPLES)
+`image_to_cnc.html` is the same converter as a single web page: open it
+in any browser, drop a picture on it, download the G-code. Nothing is
+uploaded anywhere.
 
-## Training Parameters
+### Is the Fourier transform useful for CNC?
 
-When calling the `model.train()` method, you can use the following parameters (Parameters are listed in sequence):
+Not as a toolpath format: a controller only follows straight lines and
+arcs, a series describes exactly one closed curve, and it rounds and
+overshoots every corner. Yes as a filter: dropping the high frequencies
+of a traced outline removes pixel stair-steps and gives one knob for
+detail, which is exactly the number of circles in the animation. The
+full argument, with pictures, is in
+[`image-to-cnc/README.md`](image-to-cnc/README.md).
 
-* `X` = training examples
-* `Y` = training labels
-* `iterations` = default value is set to 10. This is the number of times the training loop will run for
-* `alpha` = default value is set to 0.001. This is the learning rate
-* `decay` = default value is set to True. This is a boolean which will check for whether or not learning rate decays as training progresses
-* `decay_iter` = default value is 5. This is the number of iterations after which learning rate will be decayed
-* `decay_rate` = default valye is 0.9. This is the rate with which the learning rate will be reduced i.e. if decay was `alpha`, after number of `decay_iter` iterations, the new value will be `alpha * decay_rate` 
-* `stop_decay_counter` = default value is 100. This is the maximum number of changes that can happen to the learning rate while training
-* `verbose` = default is set to True. If this is set to true, the model will display the value for Cost after each iteration
-* `lam` = default is set to 0. This is the l2 regularization parameter
+## Requirements
 
-## Predictions, Evaluations and Plots
-
-You can use the `model.evaluate(X, Y)` method to evaluate your test set(s). This returns a `float` accuracy score. You can use the `model.predict(X)` method to get predictions on new data. This will return a numpy array with the predicted labels (0 or 1). There are three plotting methods you can use after training to plot cost, accuracy and learning rate called `model.plot_cost()`, `model.plot_acc()` and `model.plot_alpha()`
-
-## Activation Functions
-
-Currently, all the hidden units will have *relu* activation function and the output layer has the *sigmoid* activation function
-
-## Training Loop
-
-The training loop does the following:
-
-* As a first step, it initializes all the parameters of all the layers
-* Then, the loop starts for the given number of iterations (full training set is used in each iteration)
-* Inside the loop, forward propagation is applied, then the cost is calculated, then the gradients are calculated and finally, the parameters are updated.
-
-## Example - Recognising Hand Written 0s and 1s from MNIST
-
-I wanted to apply the neural network model to the MNIST dataset, and perhaps I'll do that in the next iteration, but at the moment the model can only do binary classification, not multi-class classification. So, I decided to try and train the model on only the hand-written 0s and 1s from the MNIST dataset.
-
-The model architecture was `[784, 64, 64, 1]` and was trained for 60 iterations (batch gradient descent) with learning rate set to 0.003 and regularization parameter set to 4. The resulting accuracy on a test set was ~97%.
+Python 3.10 or newer, `numpy`, `matplotlib`; `opencv-python-headless` for
+the CNC script; `ffmpeg` only for MP4 output. The two HTML pages need
+nothing but a browser.

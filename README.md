@@ -76,3 +76,20 @@ python fourier_india.py --circles 100 -o india_100.mp4
 ```
 
 See [`fourier-india/README.md`](fourier-india/README.md) for the maths, the options and where the border data comes from.
+
+## Bonus - Image to CNC toolpath
+
+[`image-to-cnc/image_to_gcode.py`](image-to-cnc/) converts a picture into
+G-code for a wood CNC router: outlines of a black-on-white design ordered
+with minimal tool travel, or a photo as one continuous line that never
+lifts. It optionally uses the Fourier low-pass from the animation above to
+smooth traced outlines, and its README explains where the Fourier
+transform helps a CNC pipeline and where it does not.
+
+![lettering sample converted to a toolpath](image-to-cnc/samples/logo_toolpath.png)
+
+```bash
+cd image-to-cnc
+python image_to_gcode.py samples/logo.png -o logo.nc --width-mm 200 --depth 1.5 --stepdown 0.8
+python image_to_gcode.py photo.jpg -o photo.nc --mode singleline --points 8000
+```
